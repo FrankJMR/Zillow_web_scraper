@@ -16,18 +16,7 @@ df_list = []
 
 #iterate pages
 for i in range(page):
-    #captcha catch-> pauses indefinitely
-#    while True:
-#        try:
-#            listing = zillow.current_page_listings(driver)
-#        except (NoSuchElementException):
-#            print("\nCAPTCHA!\n"\
-#              "Manually complete the captcha requirements.\n"\
-#              "Once that's done, if the program was in the middle of scraping "\
-#              "(and is still running), it should resume scraping after ~15 seconds.")
-#            time.sleep(30)
-#        else:
-#            break
+
     listing = zillow.current_page_listings(driver)    
     print('page #{}'.format(i+1))
     """with alive_bar(len(listing),bar='smooth',theme='ascii') as bar:"""
