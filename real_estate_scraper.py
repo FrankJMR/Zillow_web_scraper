@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException,TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as e_c
@@ -57,38 +57,52 @@ def captcha_pause_(driver):
 
 def turn_page(driver,i):
     nav_bar = driver.find_element_by_class_name('search-pagination')
-    page = nav_bar.find_element_by_link_text(str(i))
-    #WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
-    page.click()
+    WebDriverWait(nav_bar,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
     captcha_check(driver)
 
 def navigate_facts_features(driver):
-    captcha_check(driver)
     time.sleep(2)
-    house = get_basic_info(driver)
+    while True:
+        try:
+            house = get_basic_info(driver)
+            WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,'Facts and features'))).click()
+        except (NoSuchElementException,TimeoutException):
+             print("\nCAPTCHA!\n"\
+              "Manually complete the captcha requirements.\n"\
+              "Once that's done, if the program was in the middle of scraping "\
+              "(and is still running), it should resume scraping after ~15 seconds.")
+             time.sleep(15)
+        else:
+            url = get_url(driver)
+            bed_bath = get_bed_bath(driver)   
+            kitchen = get_kitchen(driver)
+            family_room = get_family(driver)
+            dining_room = get_dining(driver)
+            living_room = get_living(driver)
+            basement = get_basement(driver)
+            flooring = get_flooring(driver)
+            heat = get_heating(driver)
+            cool = get_cooling(driver)
+            appliances = get_appliances(driver)
+            interior = get_interior(driver)
+            
+            super_dict = {**url,**house,
+                          **bed_bath,**kitchen,
+                          **family_room,**dining_room,
+                          **living_room,**basement,
+                          **flooring,**heat,
+                          **cool,**appliances,
+                          **interior}
+            
+            return super_dict
+        
+def get_url(driver):
+    url = "//link[@rel = 'canonical']"
+    search_xpath = driver.find_element_by_xpath(url)
+    elementHTML = search_xpath.get_attribute('href')
+    elementSoup = BeautifulSoup(elementHTML,'html.parser')
     
-    WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,'Facts and features'))).click()
-    
-    bed_bath = get_bed_bath(driver)   
-    kitchen = get_kitchen(driver)
-    family_room = get_family(driver)
-    dining_room = get_dining(driver)
-    living_room = get_living(driver)
-    basement = get_basement(driver)
-    flooring = get_flooring(driver)
-    heat = get_heating(driver)
-    cool = get_cooling(driver)
-    appliances = get_appliances(driver)
-    interior = get_interior(driver)
-    
-    super_dict = {**house,**bed_bath,
-                  **kitchen,**family_room,
-                  **dining_room,**living_room,
-                  **basement,**flooring,
-                  **heat,**cool,
-                  **appliances,**interior}
-    #print('\n\n',super_dict)
-    return super_dict
+    return {"url": elementSoup.text}
 
 def get_basic_info(driver):
     common_path = "//div[@class = 'ds-home-details-chip']"
@@ -101,6 +115,7 @@ def get_basic_info(driver):
     bldg = "//span[contains(text(),'Type')]/../span[2]"
     year = extra_path+"//span[contains(text(),'Year built')]/../span[2]"
     lot = extra_path+"//span[contains(text(),'Lot')]/../span[2]"
+    #lot_secondary = 
     
     features = [price,address,neighborhood,bldg,year,lot]
     
@@ -220,7 +235,8 @@ def parse_html(driver,features_paths,feature_names):
     
     for idx,element in enumerate(features_paths):
         try:
-            search_xpath = driver.find_element_by_xpath(element)
+            #WebDriverWait(driver, 10).until(e_c.visibility_of_element_located((By.XPATH, element)))
+            search_xpath = driver.find_element_by_xpath(element) 
         except (NoSuchElementException,ValueError):
             col_names[feature_names[idx]] = None
         else:
