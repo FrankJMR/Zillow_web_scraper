@@ -31,11 +31,6 @@ def current_page_listings(driver):
         try:
             listings = WebDriverWait(driver, 20).until(
             e_c.presence_of_all_elements_located((By.XPATH,"//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")))
-            #listings = WebDriverWait(driver, 10).until(
-            #e_c.element_to_be_clickable((By.XPATH,"//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")))
-            #listings = driver.find_elements_by_xpath("//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")
-            #main = driver.find_element_by_id("search-page-list-container")
-            #listing = main.find_elements_by_class_name('list-card-info')
         except (NoSuchElementException):
             print("No element found. If there is a captcha on screen\n"\
                   "Complete it manually to continue\n"\
