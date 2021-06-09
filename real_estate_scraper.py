@@ -27,10 +27,24 @@ def __pause__(seconds):
     
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
-    main = driver.find_element_by_id("search-page-list-container")
-    listing = main.find_elements_by_class_name('list-card-info')   
+    while True:
+        try:
+            listings = WebDriverWait(driver, 20).until(
+            e_c.presence_of_all_elements_located((By.XPATH,"//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")))
+            #listings = WebDriverWait(driver, 10).until(
+            #e_c.element_to_be_clickable((By.XPATH,"//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")))
+            #listings = driver.find_elements_by_xpath("//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")
+            #main = driver.find_element_by_id("search-page-list-container")
+            #listing = main.find_elements_by_class_name('list-card-info')
+        except (NoSuchElementException):
+            print("No element found. If there is a captcha on screen\n"\
+                  "Complete it manually to continue\n"\
+                  "Web scraper will continue in ~15 seconds")
+            time.sleep(15)
+        else:
+            break
     
-    return listing
+    return listings
         
 def captcha_check(driver):
     """Identifies captcha container and pauses script execution until 
@@ -56,9 +70,10 @@ def captcha_pause_(driver):
             break
 
 def turn_page(driver,i):
+    driver.refresh()
+    time.sleep(2)
     nav_bar = driver.find_element_by_class_name('search-pagination')
     WebDriverWait(nav_bar,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
-    captcha_check(driver)
 
 def navigate_facts_features(driver):
     time.sleep(2)
@@ -108,7 +123,7 @@ def get_basic_info(driver):
     common_path = "//div[@class = 'ds-home-details-chip']"
     extra_path = "//div[@class='ds-home-facts-and-features reso-facts-features sheety-facts-features']"
     
-    price = common_path+"//div[@class = 'ds-summary-row ds-collapse-row']/span/span/span"
+    price = common_path+"//span[contains(text(),'$')]"
     address = common_path+"//h1[@id='ds-chip-property-address']/span"
     neighborhood = common_path+"//h1[@id='ds-chip-property-address']/span[2]"
     
@@ -235,13 +250,13 @@ def parse_html(driver,features_paths,feature_names):
     
     for idx,element in enumerate(features_paths):
         try:
-            #WebDriverWait(driver, 10).until(e_c.visibility_of_element_located((By.XPATH, element)))
-            search_xpath = driver.find_element_by_xpath(element) 
+            search_xpath = driver.find_element_by_xpath(element)
         except (NoSuchElementException,ValueError):
             col_names[feature_names[idx]] = None
         else:
             elementHTML = search_xpath.get_attribute('outerHTML')
             elementSoup = BeautifulSoup(elementHTML,'html.parser')
+            print(elementSoup.prettify())
             if ':' in elementSoup.get_text():
                 col_names[feature_names[idx]] = elementSoup.get_text().split(":")[1]
             elif '$' in elementSoup.get_text():

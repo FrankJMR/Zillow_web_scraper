@@ -10,16 +10,15 @@ driver = zillow.create_driver("C:\Program Files (x86)\chromedriver.exe")
 
 #initial webpage
 zillow.navigate(driver,site)
-page = 1
+page = 20
 
 df_list = []
 
 #iterate pages
 for i in range(page):
-
     listing = zillow.current_page_listings(driver)    
     print('page #{}'.format(i+1))
-    """with alive_bar(len(listing),bar='smooth',theme='ascii') as bar:"""
+    print('\n\n\n number of listings: ',len(listing))
     #iterate through listings on current page
     for j in range(len(listing)):
         time.sleep(2)
@@ -42,15 +41,16 @@ for i in range(page):
             df_list.append(listing_info_df)
             
             listing = zillow.current_page_listings(driver)
-        """#time.sleep(0.002)
-        #bar()"""
-
+        
     zillow.turn_page(driver,i+2)
     
-
 final_df = pd.concat(df_list)
-
-
 
 print(final_df)
 
+
+
+
+"""with alive_bar(len(listing),bar='smooth',theme='ascii') as bar:"""
+"""#time.sleep(0.002)
+        #bar()"""
