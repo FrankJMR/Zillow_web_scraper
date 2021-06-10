@@ -4,6 +4,7 @@ from selenium.common.exceptions import NoSuchElementException,TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as e_c
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
 import time
 
@@ -13,7 +14,9 @@ def navigate(driver,website):
 
 def create_driver(PATH):
     """inits webdriver"""
-    driver = webdriver.Chrome(PATH)
+    chop = ChromeOptions()
+    chop.add_extension("C:\\Program Files (x86)\\buster.crx")
+    driver = webdriver.Chrome(executable_path = PATH,chrome_options = chop)
     return driver
 
 def close_scraper(driver):
@@ -30,7 +33,7 @@ def current_page_listings(driver):
     while True:
         try:
             listings = WebDriverWait(driver, 20).until(
-            e_c.presence_of_all_elements_located((By.XPATH,"//div[@Id = 'search-page-list-container']//div[@class = 'list-card-info']")))
+            e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(contains(@class, 'nav-ad'))]")))
         except (NoSuchElementException):
             print("No element found. If there is a captcha on screen\n"\
                   "Complete it manually to continue\n"\
@@ -67,14 +70,13 @@ def captcha_pause_(driver):
 def turn_page(driver,i):
     driver.refresh()
     time.sleep(2)
-    nav_bar = driver.find_element_by_class_name('search-pagination')
-    WebDriverWait(nav_bar,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
+    #nav_bar = driver.find_element_by_class_name('search-pagination')
+    WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
 
 def navigate_facts_features(driver):
     time.sleep(2)
     while True:
-        try:
-            house = get_basic_info(driver)
+        try:          
             WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,'Facts and features'))).click()
         except (NoSuchElementException,TimeoutException):
              print("\nCAPTCHA!\n"\
@@ -83,6 +85,8 @@ def navigate_facts_features(driver):
               "(and is still running), it should resume scraping after ~15 seconds.")
              time.sleep(15)
         else:
+            time.sleep(3)
+            house = get_basic_info(driver)
             url = get_url(driver)
             bed_bath = get_bed_bath(driver)   
             kitchen = get_kitchen(driver)

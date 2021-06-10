@@ -31,7 +31,6 @@ for i in range(page):
             print('stale element reference')
         else:
             time.sleep(3)
-    
             listing_data = zillow.navigate_facts_features(driver)
             print(listing_data)
             
