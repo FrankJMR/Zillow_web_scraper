@@ -12,6 +12,10 @@ def navigate(driver,website):
     """Function to briefly pause script execution"""
     driver.get(website)
 
+def close_listing(driver):
+    close_path = "//button[contains(@class,'ds-close-lightbox-icon')]//div"
+    WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.XPATH,close_path))).click()
+    
 def create_driver(PATH):
     """inits webdriver"""
     chop = ChromeOptions()
@@ -28,22 +32,33 @@ def __pause__(seconds):
     """Function to briefly pause script execution"""
     time.sleep(seconds)
     
+#def current_page_listings(driver):
+#    """function that iterates through all listings in one page"""
+#    while True:
+#        try:
+#            listings = WebDriverWait(driver, 20).until(
+#            e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(contains(@class, 'nav-ad'))]")))
+#        except (NoSuchElementException):
+#            print("No element found. If there is a captcha on screen\n"\
+#                  "Complete it manually to continue\n"\
+#                  "Web scraper will continue in ~15 seconds")
+#            time.sleep(15)
+#        else:
+#            break
+#    
+#    return listings
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
-    while True:
-        try:
-            listings = WebDriverWait(driver, 20).until(
-            e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(contains(@class, 'nav-ad'))]")))
-        except (NoSuchElementException):
-            print("No element found. If there is a captcha on screen\n"\
-                  "Complete it manually to continue\n"\
-                  "Web scraper will continue in ~15 seconds")
-            time.sleep(15)
-        else:
-            break
-    
-    return listings
-        
+    try:
+        listings = WebDriverWait(driver, 20).until(
+        e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(descendant-or-self::node()/@class[contains(.,'nav-ad')])]")))
+    except (NoSuchElementException):
+        print("No element found. If there is a captcha on screen\n"\
+              "Complete it manually to continue\n"\
+              "Web scraper will continue in ~15 seconds")
+        time.sleep(15)
+    return listings    
+
 def captcha_check(driver):
     """Identifies captcha container and pauses script execution until 
     captcha is manually completed"""
@@ -255,7 +270,7 @@ def parse_html(driver,features_paths,feature_names):
         else:
             elementHTML = search_xpath.get_attribute('outerHTML')
             elementSoup = BeautifulSoup(elementHTML,'html.parser')
-            print(elementSoup.prettify())
+            
             if ':' in elementSoup.get_text():
                 col_names[feature_names[idx]] = elementSoup.get_text().split(":")[1]
             elif '$' in elementSoup.get_text():

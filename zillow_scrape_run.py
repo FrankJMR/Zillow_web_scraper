@@ -4,13 +4,13 @@ from alive_progress import alive_bar
 from selenium.common.exceptions import StaleElementReferenceException,NoSuchElementException
 import pandas as pd
 import time
-#search
+
 site = "https://www.zillow.com/homes/Cook-County,-IL_rb/"
 driver = zillow.create_driver("C:\Program Files (x86)\chromedriver.exe")
 
 #initial webpage
 zillow.navigate(driver,site)
-page = 20
+page = 1
 
 df_list = []
 
@@ -34,7 +34,7 @@ for i in range(page):
             listing_data = zillow.navigate_facts_features(driver)
             print(listing_data)
             
-            driver.back()
+            zillow.close_listing(driver)
             
             listing_info_df = pd.DataFrame([listing_data])
             df_list.append(listing_info_df)
