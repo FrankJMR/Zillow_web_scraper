@@ -32,21 +32,6 @@ def __pause__(seconds):
     """Function to briefly pause script execution"""
     time.sleep(seconds)
     
-#def current_page_listings(driver):
-#    """function that iterates through all listings in one page"""
-#    while True:
-#        try:
-#            listings = WebDriverWait(driver, 20).until(
-#            e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(contains(@class, 'nav-ad'))]")))
-#        except (NoSuchElementException):
-#            print("No element found. If there is a captcha on screen\n"\
-#                  "Complete it manually to continue\n"\
-#                  "Web scraper will continue in ~15 seconds")
-#            time.sleep(15)
-#        else:
-#            break
-#    
-#    return listings
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
     try:
