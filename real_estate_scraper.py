@@ -10,16 +10,26 @@ import time
 
 def navigate(driver,website):
     """Function to briefly pause script execution"""
-    driver.get(website)
+    try:
+        driver.get(website)
+    except (TimeoutException):
+         print("Web page could not be reached\n"\
+                  "If there is a captcha complete it manually to continue\n"\
+                  "Web scraper will continue in ~15 seconds")
 
 def close_listing(driver):
     close_path = "//button[contains(@class,'ds-close-lightbox-icon')]//div"
     WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.XPATH,close_path))).click()
+    time.sleep(2)
+def current_url(driver):
+    current_url = driver.current_url
+    driver.get(current_url)
     
 def create_driver(PATH):
     """inits webdriver"""
     chop = ChromeOptions()
     chop.add_extension("C:\\Program Files (x86)\\buster.crx")
+    chop.add_argument("start-maximized")
     driver = webdriver.Chrome(executable_path = PATH,chrome_options = chop)
     return driver
 
@@ -27,33 +37,24 @@ def close_scraper(driver):
     """Function closes driver execution"""
     time.sleep(5)
     driver.close()
-
-def __pause__(seconds):
-    """Function to briefly pause script execution"""
-    time.sleep(seconds)
     
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
-    try:
-        listings = WebDriverWait(driver, 20).until(
-        e_c.presence_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(descendant-or-self::node()/@class[contains(.,'nav-ad')])]")))
-    except (NoSuchElementException):
-        print("No element found. If there is a captcha on screen\n"\
-              "Complete it manually to continue\n"\
-              "Web scraper will continue in ~15 seconds")
-        time.sleep(15)
-    return listings    
-
-def captcha_check(driver):
-    """Identifies captcha container and pauses script execution until 
-    captcha is manually completed"""
-    if is_web_element_displayed(driver, "captcha-container"):
-        print("\nCAPTCHA!\n"\
-              "Manually complete the captcha requirements.\n"\
-              "Once that's done, if the program was in the middle of scraping "\
-              "(and is still running), it should resume scraping after ~30 seconds.")
-        captcha_pause_(driver)
-        
+    attempts = 0
+    while attempts <= 20:
+        try:
+            listings = WebDriverWait(driver, 20).until(
+            e_c.visibility_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(descendant-or-self::node()/@class[contains(.,'nav-ad')])]")))
+        except (NoSuchElementException,TimeoutException):
+            print("No element found. If there is a captcha on screen\n"\
+                  "Complete it manually to continue\n"\
+                  "Web scraper will continue in ~15 seconds")
+            attempts+=1
+            time.sleep(15)
+        else:
+            break
+    return listings
+                
 def is_web_element_displayed(driver,element):
     try:
         web_element_displayed = driver.find_element_by_class_name(element).is_displayed()
@@ -61,12 +62,6 @@ def is_web_element_displayed(driver,element):
         web_element_displayed = False
     return web_element_displayed
     
-def captcha_pause_(driver):
-    while True:
-        time.sleep(30)
-        if not is_web_element_displayed(driver, "captcha-container"):
-            break
-
 def turn_page(driver,i):
     driver.refresh()
     time.sleep(2)
@@ -74,7 +69,7 @@ def turn_page(driver,i):
     WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
 
 def navigate_facts_features(driver):
-    time.sleep(2)
+    time.sleep(5)
     while True:
         try:          
             WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,'Facts and features'))).click()
