@@ -21,9 +21,9 @@ def close_listing(driver):
     close_path = "//button[contains(@class,'ds-close-lightbox-icon')]//div"
     WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.XPATH,close_path))).click()
     time.sleep(2)
-def current_url(driver):
-    current_url = driver.current_url
-    driver.get(current_url)
+    
+def get_current_url(driver):
+    return driver.current_url
     
 def create_driver(PATH):
     """inits webdriver"""
@@ -41,7 +41,7 @@ def close_scraper(driver):
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
     attempts = 0
-    while attempts <= 20:
+    while True:
         try:
             listings = WebDriverWait(driver, 20).until(
             e_c.visibility_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(descendant-or-self::node()/@class[contains(.,'nav-ad')])]")))
@@ -53,6 +53,7 @@ def current_page_listings(driver):
             time.sleep(15)
         else:
             break
+        
     return listings
                 
 def is_web_element_displayed(driver,element):
@@ -68,7 +69,7 @@ def turn_page(driver,i):
     #nav_bar = driver.find_element_by_class_name('search-pagination')
     WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
 
-def navigate_facts_features(driver):
+def navigate_facts_features(driver,element):
     time.sleep(5)
     while True:
         try:          
@@ -78,7 +79,9 @@ def navigate_facts_features(driver):
               "Manually complete the captcha requirements.\n"\
               "Once that's done, if the program was in the middle of scraping "\
               "(and is still running), it should resume scraping after ~15 seconds.")
+             print('this is the current url', driver.current_url)
              time.sleep(15)
+    
         else:
             time.sleep(3)
             house = get_basic_info(driver)
