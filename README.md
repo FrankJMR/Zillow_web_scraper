@@ -1,7 +1,7 @@
 # Zillow webscraper (Selenium and bs4)
 
 ## Description
-I am building a zillow web scraper using selenium and beautiful soup for a future data-science project.This scraper will go through and click on each listing for a specified number of pages for the following information:
+I am building a zillow web scraper using selenium and beautiful soup for a future data-science project. This scraper will go through and click on each listing for a specified number of pages for the following information:
 
 1. Basic house info
   * Sale Price
@@ -77,7 +77,9 @@ Copy and paste the location of where your chromedriver is installed such as:
 
 Please note that this scraper is significantly slower than traditional web-scrapers. This is for one of two reasons.
 1. Captchas are frequent (yes, very annoying) and require manual input.
-2. This script uses XPATH as selectors because zillow is java-script heavy and the DOM is quite complex.
+2. This script uses XPATH as the method of selecting elements because zillow is java-script heavy and the DOM is quite complex.
+
+I found that the average time of scraping a page of listings took ~13 minutes. If anyone has any suggestions to optimize, I'm all ears. However, for the time being this satisfied my data collection needs.
 
 ## Software dependencies 
 Made in Python 3.7.4
