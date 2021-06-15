@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as e_c
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
+import numpy as np
 import time
 
 def navigate(driver,website):
@@ -14,8 +15,8 @@ def navigate(driver,website):
         driver.get(website)
     except (TimeoutException):
          print("Web page could not be reached\n"\
-                  "If there is a captcha complete it manually to continue\n"\
-                  "Web scraper will continue in ~15 seconds")
+               "If there is a captcha complete it manually to continue\n"\
+               "Web scraper will continue in ~15 seconds\n")
 
 def close_listing(driver):
     close_path = "//button[contains(@class,'ds-close-lightbox-icon')]//div"
@@ -40,16 +41,14 @@ def close_scraper(driver):
     
 def current_page_listings(driver):
     """function that iterates through all listings in one page"""
-    attempts = 0
     while True:
         try:
             listings = WebDriverWait(driver, 20).until(
             e_c.visibility_of_all_elements_located((By.XPATH,"//div[@class = 'list-card-info']/../../../li[not(descendant-or-self::node()/@class[contains(.,'nav-ad')])]")))
-        except (NoSuchElementException,TimeoutException):
+        except (NoSuchElementException,TimeoutException):            
             print("No element found. If there is a captcha on screen\n"\
                   "Complete it manually to continue\n"\
-                  "Web scraper will continue in ~15 seconds")
-            attempts+=1
+                  "Web scraper will continue in ~15 seconds\n")
             time.sleep(15)
         else:
             break
@@ -66,21 +65,29 @@ def is_web_element_displayed(driver,element):
 def turn_page(driver,i):
     driver.refresh()
     time.sleep(2)
-    #nav_bar = driver.find_element_by_class_name('search-pagination')
-    WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
+    while True:
+        try:
+            WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,str(i)))).click()
+        except (TimeoutException):
+             print("No element found. If there is a captcha on screen\n"\
+                  "Complete it manually to continue\n"\
+                  "Web scraper will continue in ~15 seconds\n")
+        else:
+            time.sleep(2)
+            break
 
 def navigate_facts_features(driver,element):
     time.sleep(5)
     while True:
         try:          
             WebDriverWait(driver,10).until(e_c.element_to_be_clickable((By.LINK_TEXT,'Facts and features'))).click()
-        except (NoSuchElementException,TimeoutException):
-             print("\nCAPTCHA!\n"\
+        except (NoSuchElementException,TimeoutException):             
+            print("\n\nCAPTCHA!\n"\
               "Manually complete the captcha requirements.\n"\
-              "Once that's done, if the program was in the middle of scraping "\
+              "Once that's done, if the program was in the middle of scraping \n"\
               "(and is still running), it should resume scraping after ~15 seconds.")
-             print('this is the current url', driver.current_url)
-             time.sleep(15)
+            print('\nThis is the current url: {}\n'.format(driver.current_url))
+            time.sleep(15)
     
         else:
             time.sleep(3)
@@ -97,6 +104,12 @@ def navigate_facts_features(driver,element):
             cool = get_cooling(driver)
             appliances = get_appliances(driver)
             interior = get_interior(driver)
+            #new
+            parking = get_parking(driver)
+            second_lot = get_secondary_lot(driver)
+            prop = get_property_details(driver)
+            construction = get_construction(driver)
+            
             
             super_dict = {**url,**house,
                           **bed_bath,**kitchen,
@@ -104,17 +117,14 @@ def navigate_facts_features(driver,element):
                           **living_room,**basement,
                           **flooring,**heat,
                           **cool,**appliances,
-                          **interior}
+                          **interior,**parking,
+                          **second_lot,**prop,
+                          **construction}
             
             return super_dict
         
 def get_url(driver):
-    url = "//link[@rel = 'canonical']"
-    search_xpath = driver.find_element_by_xpath(url)
-    elementHTML = search_xpath.get_attribute('href')
-    elementSoup = BeautifulSoup(elementHTML,'html.parser')
-    
-    return {"url": elementSoup.text}
+    return {"url":driver.current_url}
 
 def get_basic_info(driver):
     common_path = "//div[@class = 'ds-home-details-chip']"
@@ -127,11 +137,11 @@ def get_basic_info(driver):
     bldg = "//span[contains(text(),'Type')]/../span[2]"
     year = extra_path+"//span[contains(text(),'Year built')]/../span[2]"
     lot = extra_path+"//span[contains(text(),'Lot')]/../span[2]"
-    #lot_secondary = 
+    int_lot = "(//div[@class = 'ds-bed-bath-living-area-header'])[last()]//span[text()='sqft']/../span[1]"
     
-    features = [price,address,neighborhood,bldg,year,lot]
+    features = [price,address,neighborhood,bldg,year,lot,int_lot]
     
-    return parse_html(driver,features,['SalePrice','Address','Neighborhood','Type','YearBlt','LotSize'])
+    return parse_html(driver,features,['SalePrice','Address','Neighborhood','Type','YearBlt','LotSize','int_lot'])
         
 def get_bed_bath(driver):  
     common_path = "//h6[contains(text(),'Bedrooms and bathrooms')]"
@@ -186,7 +196,6 @@ def get_living(driver):
     description = common_path+"/..//span[contains(text(),'Description')]"
     level = common_path+"/..//span[contains(text(),'Level')]"
     area = common_path+"/..//span[contains(text(),'Area')]"
-    #misc = common_path+""
     
     features = [description,level,area]
     
@@ -208,7 +217,7 @@ def get_flooring(driver):
     
     features = [flooring]
     
-    return parse_html(driver,features,['fooring_desc'])
+    return parse_html(driver,features,['flooring_desc'])
 
 def get_heating(driver):
     common_path = "//h6[contains(text(),'Heating')]"
@@ -242,6 +251,56 @@ def get_interior(driver):
     
     return parse_html(driver,features,['interior_desc','interior_door'])
 
+def get_parking(driver):
+    common_path = "//h6[contains(text(),'Parking')]"
+    
+    spaces = common_path+"/..//span[contains(text(),'Total spaces')]"
+    parking_feature = common_path+"/..//span[contains(text(),'Parking features')]"
+    garage_spaces = common_path+"]/..//span[contains(text(),'Garage spaces:')]"
+    covered_spaces = common_path+"/..//span[contains(text(),'Covered spaces:')]"
+    
+    features = [spaces,parking_feature,garage_spaces,covered_spaces]
+    
+    return parse_html(driver,features,['Total_spaces','Parking_features','Garage_spaces','Covered_spaces'])
+
+def get_secondary_lot(driver):
+    common_path = "//h6[contains(text(),'Lot')]"
+    
+    secondary_size = common_path+"/..//span[contains(text(),'Lot size:')]"
+    lot_feature = common_path+"/..//span[contains(text(),'Lot features:')]"
+    
+    features = [secondary_size,lot_feature]
+    
+    return parse_html(driver,features,['Lot_size2','Lot_features'])
+
+def get_property_details(driver):
+    common_path = "//h6[contains(text(),'Property')]"
+    
+    zoning_common_path = "//h6[contains(text(),'Other property information')]"
+    prop_levels = common_path+"/..//span[contains(text(),'Levels:')]"
+    patio_porch = common_path+"/..//span[contains(text(),'Patio and porch details:')]"
+    zoning = zoning_common_path+"/..//span[contains(text(),'Zoning:')]"
+    
+    features = [prop_levels,patio_porch,zoning]
+    
+    return parse_html(driver,features,['Property_levels','patio/porch_feature','Zoning'])
+
+def get_construction(driver):
+    style_common_path = "//h6[contains(text(),'Type and style')]"
+    material_common_path = "//h6[contains(text(),'Material information')]"
+    condition_common_path = "//h6[contains(text(),'Condition')]"
+    
+    arch = style_common_path+"/..//span[contains(text(),'Architectural style:')]"
+    sub_type = style_common_path+"/..//span[contains(text(),'Property subType:')]"
+    construction_mat = material_common_path+"/..//span[contains(text(),'Construction materials:')]"
+    foundation = material_common_path+"/..//span[contains(text(),'Foundation:')]"
+    prop_condition = condition_common_path+"/..//span[contains(text(),'Property condition:')]"
+    new_construction = condition_common_path+"/..//span[contains(text(),'New construction:')]"
+    
+    features = [arch,sub_type,construction_mat,foundation,prop_condition,new_construction]
+    
+    return parse_html(driver,features,['Structure_style','Property_SubType','Construction_material','Foundation','Property_condition','New_construction'])
+    
 def parse_html(driver,features_paths,feature_names):
     col_names = dict.fromkeys(feature_names)
     
@@ -249,7 +308,7 @@ def parse_html(driver,features_paths,feature_names):
         try:
             search_xpath = driver.find_element_by_xpath(element)
         except (NoSuchElementException,ValueError):
-            col_names[feature_names[idx]] = None
+            col_names[feature_names[idx]] = np.nan
         else:
             elementHTML = search_xpath.get_attribute('outerHTML')
             elementSoup = BeautifulSoup(elementHTML,'html.parser')
