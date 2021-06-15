@@ -79,7 +79,11 @@ Please note that this scraper is significantly slower than traditional web-scrap
 1. Captchas are frequent (yes, very annoying) and require manual input.
 2. This script uses XPATH as the method of selecting elements because zillow is java-script heavy and the DOM is quite complex.
 
-I found that the average time of scraping a page of listings took ~13 minutes. If anyone has any suggestions to optimize, I'm all ears. However, for the time being this satisfied my data collection needs.
+~I found that the average time of scraping a page of listings took ~13 minutes. If anyone has any suggestions to optimize, I'm all ears. However, for the time being this satisfied my data collection needs.
+~There is frequent missing entries. This is because 
+   * Mostly Property types vary highly (which means differing data).
+   * Mostly Zillow not being ultra precise with organizing their data
+   * Occasionally, element XPATHs being different from page to page.
 
 ## Software dependencies 
 Made in Python 3.7.4

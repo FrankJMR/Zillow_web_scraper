@@ -275,8 +275,8 @@ def get_secondary_lot(driver):
 
 def get_property_details(driver):
     common_path = "//h6[contains(text(),'Property')]"
-    
     zoning_common_path = "//h6[contains(text(),'Other property information')]"
+    
     prop_levels = common_path+"/..//span[contains(text(),'Levels:')]"
     patio_porch = common_path+"/..//span[contains(text(),'Patio and porch details:')]"
     zoning = zoning_common_path+"/..//span[contains(text(),'Zoning:')]"
