@@ -1,7 +1,7 @@
 # Zillow webscraper (Selenium and bs4)
 
 ## Description
-I am building a zillow web scraper using selenium and beautiful soup for a future data-science project. This will output information to a spreadsheet in the near future. ​This scraper will go through and click on each listing for a specified number of pages for the following information:
+I am building a zillow web scraper using selenium and beautiful soup for a future data-science project.This scraper will go through and click on each listing for a specified number of pages for the following information:
 
 1. Basic house info
   * Sale Price
@@ -43,16 +43,42 @@ I am building a zillow web scraper using selenium and beautiful soup for a futur
 10. Interior 
    * Door  details
    * Interior details
+  
+11. Parking
+   * Spaces
+   * Parking features
+   * Garage spaces
+   * Covered spaces
+   
+12. Lot details
+   * Lot size 2
+   * Lot features
+   
+13. Property details
+   * Property Levels
+   * Patio/Porch features
+   * Zoning
+   
+14. Construction 
+   * Architectural style
+   * Property sub-type
+   * Construction material
+   * Foundation
+   * Property Condition
+   * New Construction (Yes/No)
 
 ## Usage
 When using this I recommend copy and pasting the link with your specified query instructions to determine in what location this scraper should extract data from.
+I reccomend doing so by County, but it should work for different boundaries 
 > site = "https://www.zillow.com/homes/Cook-County,-IL_rb/"
 
 Copy and paste the location of where your chromedriver is installed such as:
 >driver = zillow.create_driver("C:\Program Files (x86)\chromedriver.exe")
 
-Note that this will not output to a spreadsheet quite yet, I'm tinkering with making this more consistent with scraping data and managing exceptions in failed cases. Outputting to a spreadsheet will be a fairly easily implementation with pandas.
-Also note that Captchas are frequent (yes, very annoying), with the current code it fails to pause searching for web elements on page and fails. This will be fixed but manual input will still be needed to complete captchas. 
+Please note that this scraper is significantly slower than traditional web-scrapers. This is for one of two reasons.
+1. Captchas are frequent (yes, very annoying) and require manual input.
+2. This script uses XPATH as selectors because zillow is java-script heavy and the DOM is quite complex.
+
 ## Software dependencies 
 Made in Python 3.7.4
 * Selenium
