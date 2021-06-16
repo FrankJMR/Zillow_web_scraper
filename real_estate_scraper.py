@@ -29,7 +29,6 @@ def get_current_url(driver):
 def create_driver(PATH):
     """inits webdriver"""
     chop = ChromeOptions()
-    chop.add_extension("C:\\Program Files (x86)\\buster.crx")
     chop.add_argument("start-maximized")
     driver = webdriver.Chrome(executable_path = PATH,chrome_options = chop)
     return driver
@@ -103,8 +102,7 @@ def navigate_facts_features(driver,element):
             heat = get_heating(driver)
             cool = get_cooling(driver)
             appliances = get_appliances(driver)
-            interior = get_interior(driver)
-            #new
+            interior = get_interior(driver)         
             parking = get_parking(driver)
             second_lot = get_secondary_lot(driver)
             prop = get_property_details(driver)

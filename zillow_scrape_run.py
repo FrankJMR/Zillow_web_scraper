@@ -9,7 +9,7 @@ driver = zillow.create_driver("C:\Program Files (x86)\chromedriver.exe")
 
 #initial webpage
 zillow.navigate(driver,site)
-page = 1
+page = 20
 
 properties_list = []
 
@@ -44,10 +44,11 @@ for i in range(page):
             
                 bar()
     
-    listing.clear()  
-    zillow.turn_page(driver,i+2)
+    listing.clear()
+    if i+1 != page:
+        zillow.turn_page(driver,i+2)
     
-    
+zillow.close_scraper(driver)   
 final_df = pd.concat(properties_list)
 final_df = final_df.reset_index(drop = True)
 final_df.to_csv('house-listings-pages-'+str(page)+'.csv')
